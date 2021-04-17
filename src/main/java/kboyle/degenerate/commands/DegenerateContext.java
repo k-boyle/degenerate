@@ -11,11 +11,14 @@ import reactor.core.publisher.Mono;
 public class DegenerateContext extends CommandContext {
     public final Message message;
     public final GatewayDiscordClient client;
+    public final TextChannel channel;
 
-    public DegenerateContext(ApplicationContextWrapper applicationContextWrapper, Message message) {
+    public DegenerateContext(ApplicationContextWrapper applicationContextWrapper, Message message, TextChannel channel) {
         super(applicationContextWrapper);
+
         this.message = message;
         this.client = message.getClient();
+        this.channel = channel;
     }
 
     public Mono<Member> author() {
@@ -24,9 +27,5 @@ public class DegenerateContext extends CommandContext {
 
     public Mono<Guild> guild() {
         return message.getGuild();
-    }
-
-    public Mono<TextChannel> channel() {
-        return message.getChannel().ofType(TextChannel.class);
     }
 }

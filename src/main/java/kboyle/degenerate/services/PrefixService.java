@@ -2,9 +2,9 @@ package kboyle.degenerate.services;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.ApplicationInfo;
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import kboyle.degenerate.persistence.dao.PersistedGuildRepository;
-import kboyle.degenerate.persistence.entities.PersistedGuild;
 import reactor.core.publisher.Mono;
 
 import java.util.Set;
@@ -23,24 +23,24 @@ public class PrefixService {
     }
 
     public Mono<String> hasPrefix(Message message) {
-        String content = message.getContent();
+        var content = message.getContent();
 
         if (content.isEmpty()) {
             return Mono.empty();
         }
 
-        if (content.length() > 21 && content.charAt(0) == '<' && content.charAt(1) == '@') {
-            int start = 2;
+        if (content.length() > 16 && content.charAt(0) == '<' && content.charAt(1) == '@') {
+            var start = 2;
             if (content.charAt(start) == '!') {
                 start++;
             }
 
-            int end = content.indexOf('>');
+            var end = content.indexOf('>');
 
             if (end != -1) {
-                String strId = content.substring(start, end);
+                var strId = content.substring(start, end);
                 try {
-                    long id = Long.parseLong(strId);
+                    var id = Long.parseLong(strId);
                     if (id == applicationInfo.getId().asLong()) {
                         return Mono.just(content.substring(end + 1));
                     }
@@ -51,8 +51,8 @@ public class PrefixService {
 
         return message.getGuild()
             .handle((guild, sink) -> {
-                Set<String> prefixes = getOrFetchPrefixes(guild.getId());
-                for (String prefix : prefixes) {
+                var prefixes = getOrFetchPrefixes(guild);
+                for (var prefix : prefixes) {
                     if (content.startsWith(prefix)) {
                         sink.next(content.substring(prefix.length()));
                     }
@@ -60,34 +60,34 @@ public class PrefixService {
             });
     }
 
-    public boolean addPrefix(Snowflake guildId, String prefix) {
-        return update(guildId, prefix, Set::add);
+    public boolean addPrefix(Guild guild, String prefix) {
+        return update(guild, prefix, Set::add);
     }
 
-    public boolean removePrefix(Snowflake guildId, String prefix) {
-        return update(guildId, prefix, Set::remove);
+    public boolean removePrefix(Guild guild, String prefix) {
+        return update(guild, prefix, Set::remove);
     }
 
-    private boolean update(Snowflake guildId, String prefix, BiFunction<Set<String>, String, Boolean> func) {
-        PersistedGuild guild = repo.get(guildId.asLong());
-        boolean updated = func.apply(guild.getPrefixes(), prefix);
+    private boolean update(Guild guild, String prefix, BiFunction<Set<String>, String, Boolean> func) {
+        var persistedGuild = repo.get(guild);
+        boolean updated = func.apply(persistedGuild.getPrefixes(), prefix);
 
         if (updated) {
-            prefixesByGuildId.put(guildId, guild.getPrefixes());
-            repo.save(guild);
+            prefixesByGuildId.put(guild.getId(), persistedGuild.getPrefixes());
+            repo.save(persistedGuild);
         }
 
         return updated;
     }
 
-    public Set<String> getPrefixes(Snowflake guildId) {
-        return Set.copyOf(getOrFetchPrefixes(guildId));
+    public Set<String> getPrefixes(Guild guild) {
+        return Set.copyOf(getOrFetchPrefixes(guild));
     }
 
-    private Set<String> getOrFetchPrefixes(Snowflake guildId) {
-        return prefixesByGuildId.compute(guildId, (id, prefixes) -> {
+    private Set<String> getOrFetchPrefixes(Guild guild) {
+        return prefixesByGuildId.compute(guild.getId(), (id, prefixes) -> {
             if (prefixes == null) {
-                return repo.get(id.asLong()).getPrefixes();
+                return repo.get(guild).getPrefixes();
             }
 
             return prefixes;

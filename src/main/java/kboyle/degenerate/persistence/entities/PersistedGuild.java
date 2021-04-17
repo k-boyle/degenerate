@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Map;
 import java.util.Set;
 
 @Entity
@@ -18,4 +19,11 @@ public class PersistedGuild {
 
     @ElementCollection(fetch = FetchType.EAGER)
     private Set<String> prefixes;
+
+    @OneToMany(
+        fetch = FetchType.EAGER,
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
+    )
+    private Map<PersistedRssFeed, PersistedFeedSubscription> subscriptionByFeedUrl;
 }

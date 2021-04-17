@@ -1,12 +1,16 @@
 package kboyle.degenerate.commands.modules;
 
 import kboyle.degenerate.commands.DegenerateModule;
+import kboyle.degenerate.commands.preconditions.RequireUserPermission;
 import kboyle.degenerate.services.PrefixService;
 import kboyle.oktane.reactive.module.annotations.Aliases;
+import kboyle.oktane.reactive.module.annotations.Description;
+import kboyle.oktane.reactive.module.annotations.Require;
 import kboyle.oktane.reactive.results.command.CommandResult;
 import reactor.core.publisher.Mono;
 
 @Aliases({"prefix", "p"})
+@Description("Mange the prefixes for your guild")
 public class PrefixManagement extends DegenerateModule {
     private final PrefixService prefixService;
 
@@ -15,10 +19,11 @@ public class PrefixManagement extends DegenerateModule {
     }
 
     @Aliases({"add", "a"})
+    @Require(precondition = RequireUserPermission.class, arguments = "ADMINISTRATOR")
     public Mono<CommandResult> addPrefix(String prefix) {
         return context().guild()
             .flatMap(guild -> {
-                var result = prefixService.addPrefix(guild.getId(), prefix);
+                var result = prefixService.addPrefix(guild, prefix);
 
                 if (result) {
                     return embed("Added prefix " + prefix);
@@ -29,10 +34,11 @@ public class PrefixManagement extends DegenerateModule {
     }
 
     @Aliases({"remove", "r", "rm"})
+    @Require(precondition = RequireUserPermission.class, arguments = "ADMINISTRATOR")
     public Mono<CommandResult> removePrefix(String prefix) {
         return context().guild()
             .flatMap(guild -> {
-                var result = prefixService.removePrefix(guild.getId(), prefix);
+                var result = prefixService.removePrefix(guild, prefix);
 
                 if (result) {
                     return embed("Removed prefix " + prefix);
@@ -46,7 +52,7 @@ public class PrefixManagement extends DegenerateModule {
     public Mono<CommandResult> listPrefixes() {
         return context().guild()
             .flatMap(guild -> {
-                var prefixes = prefixService.getPrefixes(guild.getId());
+                var prefixes = prefixService.getPrefixes(guild);
 
                 if (prefixes.isEmpty()) {
                     return embed("No prefixes");

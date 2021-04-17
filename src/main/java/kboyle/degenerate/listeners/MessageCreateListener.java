@@ -2,6 +2,9 @@ package kboyle.degenerate.listeners;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.channel.TextChannel;
 import kboyle.degenerate.commands.ApplicationContextWrapper;
 import kboyle.degenerate.commands.DegenerateContext;
 import kboyle.degenerate.commands.results.DiscordResult;
@@ -31,28 +34,47 @@ public class MessageCreateListener extends DiscordListener<MessageCreateEvent> {
 
     @Override
     public Mono<Void> handle(MessageCreateEvent event) {
-        return prefixService.hasPrefix(event.getMessage())
-            .flatMap(command -> {
-                logger.info("Executing {}", command);
-
-                DegenerateContext context = new DegenerateContext(applicationContextWrapper, event.getMessage());
-                return commandHandler.execute(command, context)
-                    .flatMap(result -> {
-                        logger.info("Got result {}", result);
-
-                        if (result instanceof DiscordResult discordResult) {
-                            return discordResult.sendMessage();
-                        } else if (!(result instanceof CommandNotFoundResult) && !result.success()) {
-                            if (result instanceof ExceptionResult exceptionResult) {
-                                logger.error("An exception was thrown", exceptionResult.exception());
-                            }
-
-                            return context.channel().flatMap(channel -> channel.createMessage(result.toString()));
-                        }
-
-                        return Mono.empty();
-                    });
-            })
+        return Mono.just(event.getMessage())
+            .filter(this::notBot)
+            .flatMap(message ->
+                message.getChannel()
+                    .ofType(TextChannel.class)
+                    .flatMap(channel ->
+                        prefixService.hasPrefix(message)
+                            .flatMap(command -> executeCommand(message, channel, command))
+                    )
+            )
             .then();
+    }
+
+    private boolean notBot(Message message) {
+        return !message.getAuthor().map(User::isBot).orElse(false);
+    }
+
+    private Mono<Message> executeCommand(Message message, TextChannel channel, String command) {
+        logger.info("Executing {}", command);
+
+        var context = new DegenerateContext(
+            applicationContextWrapper,
+            message,
+            channel
+        );
+
+        return commandHandler.execute(command, context)
+            .flatMap(result -> {
+                logger.info("Got result {}", result);
+
+                if (result instanceof DiscordResult discordResult) {
+                    return discordResult.sendMessage();
+                } else if (!(result instanceof CommandNotFoundResult) && !result.success()) {
+                    if (result instanceof ExceptionResult exceptionResult) {
+                        logger.error("An exception was thrown", exceptionResult.exception());
+                    }
+
+                    return channel.createMessage(result.toString());
+                }
+
+                return Mono.empty();
+            });
     }
 }
