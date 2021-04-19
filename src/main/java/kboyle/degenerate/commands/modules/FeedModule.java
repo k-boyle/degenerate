@@ -1,5 +1,7 @@
 package kboyle.degenerate.commands.modules;
 
+import com.apptastic.rssreader.Item;
+import com.apptastic.rssreader.RssReader;
 import discord4j.core.object.entity.channel.TextChannel;
 import kboyle.degenerate.commands.DegenerateModule;
 import kboyle.degenerate.persistence.dao.PersistedGuildRepository;
@@ -8,20 +10,28 @@ import kboyle.degenerate.persistence.dao.PersistedSubscriptionRepository;
 import kboyle.degenerate.persistence.entities.PersistedFeedSubscription;
 import kboyle.degenerate.persistence.entities.PersistedRssFeed;
 import kboyle.oktane.reactive.module.annotations.Aliases;
+import kboyle.oktane.reactive.module.annotations.Name;
+import kboyle.oktane.reactive.module.annotations.Remainder;
 import kboyle.oktane.reactive.results.command.CommandResult;
 import reactor.core.publisher.Mono;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.StringJoiner;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Aliases({"feed", "f"})
+@Name("Feed")
 public class FeedModule extends DegenerateModule {
     private final PersistedGuildRepository guildRepo;
     private final PersistedRssFeedRepository feedRepo;
+    private final RssReader rssReader;
 
-    public FeedModule(PersistedGuildRepository guildRepo, PersistedRssFeedRepository feedRepo) {
+    public FeedModule(PersistedGuildRepository guildRepo, PersistedRssFeedRepository feedRepo, RssReader rssReader) {
         this.guildRepo = guildRepo;
         this.feedRepo = feedRepo;
+        this.rssReader = rssReader;
     }
 
     @Aliases({"subscribe", "sub"})
@@ -35,28 +45,37 @@ public class FeedModule extends DegenerateModule {
             .flatMap(guild -> {
                 var persistedGuild = guildRepo.get(guild);
                 var subscribedFeeds = persistedGuild.getSubscriptionByFeedUrl();
-                var subscription = subscribedFeeds.get(feed);
 
-                if (subscription != null) {
+                if (subscribedFeeds.containsKey(feed)) {
                     return embed("You are already subscribed to this feed");
                 }
 
-                subscription = new PersistedFeedSubscription(
-                    feed,
-                    new HashSet<>(),
-                    new HashSet<>(),
-                    channel.getId().asLong()
-                );
+                return Mono.fromFuture(rssReader.readAsync(feed.getUrl()))
+                    .flatMap(items -> {
+                        var guilds = items.map(Item::getGuid)
+                            .filter(Optional::isPresent)
+                            .map(Optional::get)
+                            .collect(Collectors.toSet());
 
-                subscribedFeeds.put(feed, subscription);
-                guildRepo.save(persistedGuild);
+                        var subscription = new PersistedFeedSubscription(
+                            feed,
+                            new HashSet<>(),
+                            new HashSet<>(),
+                            channel.getId().asLong(),
+                            guilds,
+                            guild.getId().asLong()
+                        );
 
-                return embed("Subscribed to feed %s", feed.getUrl());
+                        subscribedFeeds.put(feed, subscription);
+                        guildRepo.save(persistedGuild);
+
+                        return embed("Subscribed to feed %s", feed.getUrl());
+                    });
             });
     }
 
     @Aliases({"unsubscribe", "unsub"})
-    public Mono<CommandResult> unscribed(PersistedFeedSubscription subscription) {
+    public Mono<CommandResult> unsubscribe(PersistedFeedSubscription subscription) {
         return context().guild()
             .flatMap(guild -> {
                 var persistedGuild = guildRepo.get(guild);
@@ -98,8 +117,12 @@ public class FeedModule extends DegenerateModule {
     }
 
     @Aliases({"filter", "f"})
+    @Name("Filter")
     public static class FeedFilterModule extends DegenerateModule {
+        // todo list
+
         @Aliases({"add", "a"})
+        @Name("Add Filter")
         public static class FeedAddFilterModule extends DegenerateModule {
             private final PersistedSubscriptionRepository repo;
 
@@ -108,8 +131,8 @@ public class FeedModule extends DegenerateModule {
             }
 
             @Aliases("title")
-            public Mono<CommandResult> addTitleFilter(PersistedFeedSubscription subscription, String regex) {
-                var added = subscription.getTitleRegexes().add(regex);
+            public Mono<CommandResult> addTitleFilter(PersistedFeedSubscription subscription, @Remainder String regex) {
+                var added = subscription.getTitleRegexes().add(Pattern.compile(regex));
                 if (!added) {
                     return embed("This filter had already been applied");
                 }
@@ -119,8 +142,8 @@ public class FeedModule extends DegenerateModule {
             }
 
             @Aliases({"description", "desc"})
-            public Mono<CommandResult> addDescriptionFilter(PersistedFeedSubscription subscription, String regex) {
-                var added = subscription.getDescriptionRegexes().add(regex);
+            public Mono<CommandResult> addDescriptionFilter(PersistedFeedSubscription subscription, @Remainder String regex) {
+                var added = subscription.getDescriptionRegexes().add(Pattern.compile(regex));
                 if (!added) {
                     return embed("This filter had already been applied");
                 }
@@ -131,6 +154,7 @@ public class FeedModule extends DegenerateModule {
         }
 
         @Aliases({"remove", "rm", "r"})
+        @Name("Remove Filter")
         public static class FeedRemoveFilterModule extends DegenerateModule {
             private final PersistedSubscriptionRepository repo;
 
@@ -139,7 +163,7 @@ public class FeedModule extends DegenerateModule {
             }
 
             @Aliases("title")
-            public Mono<CommandResult> removeTitleFilter(PersistedFeedSubscription subscription, String regex) {
+            public Mono<CommandResult> removeTitleFilter(PersistedFeedSubscription subscription, @Remainder String regex) {
                 var removed = subscription.getTitleRegexes().remove(regex);
                 if (!removed) {
                     return embed("This filter hadn't already been applied");
@@ -150,7 +174,7 @@ public class FeedModule extends DegenerateModule {
             }
 
             @Aliases({"description", "desc"})
-            public Mono<CommandResult> removeDescriptionFilter(PersistedFeedSubscription subscription, String regex) {
+            public Mono<CommandResult> removeDescriptionFilter(PersistedFeedSubscription subscription, @Remainder String regex) {
                 var removed = subscription.getDescriptionRegexes().remove(regex);
                 if (!removed) {
                     return embed("This filter hadn't already been applied");

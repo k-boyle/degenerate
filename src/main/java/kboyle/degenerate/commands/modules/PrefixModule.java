@@ -5,16 +5,18 @@ import kboyle.degenerate.commands.preconditions.RequireUserPermission;
 import kboyle.degenerate.services.PrefixService;
 import kboyle.oktane.reactive.module.annotations.Aliases;
 import kboyle.oktane.reactive.module.annotations.Description;
+import kboyle.oktane.reactive.module.annotations.Name;
 import kboyle.oktane.reactive.module.annotations.Require;
 import kboyle.oktane.reactive.results.command.CommandResult;
 import reactor.core.publisher.Mono;
 
 @Aliases({"prefix", "p"})
 @Description("Mange the prefixes for your guild")
-public class PrefixManagement extends DegenerateModule {
+@Name("Prefix Management")
+public class PrefixModule extends DegenerateModule {
     private final PrefixService prefixService;
 
-    public PrefixManagement(PrefixService prefixService) {
+    public PrefixModule(PrefixService prefixService) {
         this.prefixService = prefixService;
     }
 

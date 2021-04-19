@@ -1,28 +1,28 @@
 package kboyle.degenerate.configuration;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.time.Duration;
+
 @ConfigurationProperties(prefix = "degenerate")
+@Getter
+@Setter
 public class DegenerateConfig {
     private Discord discord;
+    private Feed feed;
 
-    public Discord getDiscord() {
-        return discord;
-    }
-
-    public void setDiscord(Discord discord) {
-        this.discord = discord;
-    }
-
+    @Getter
+    @Setter
     public static class Discord {
         private String token;
+    }
 
-        public String getToken() {
-            return token;
-        }
-
-        public void setToken(String token) {
-            this.token = token;
-        }
+    @Getter
+    @Setter
+    public static class Feed {
+        private Duration pollingRate;
+        private boolean enabled;
     }
 }

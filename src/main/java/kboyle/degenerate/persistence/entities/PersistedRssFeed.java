@@ -4,8 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
-import java.util.Set;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "feeds")
@@ -15,7 +16,4 @@ import java.util.Set;
 public class PersistedRssFeed {
     @Id
     private String url;
-
-    @ElementCollection(fetch = FetchType.EAGER)
-    private Set<String> lastGuids;
 }

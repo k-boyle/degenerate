@@ -5,6 +5,7 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.rest.util.AllowedMentions;
 import kboyle.degenerate.commands.ApplicationContextWrapper;
 import kboyle.degenerate.commands.DegenerateContext;
 import kboyle.degenerate.commands.results.DiscordResult;
@@ -22,10 +23,10 @@ public class MessageCreateListener extends DiscordListener<MessageCreateEvent> {
     private final PrefixService prefixService;
 
     public MessageCreateListener(
-            GatewayDiscordClient gatewayDiscordClient,
-            ReactiveCommandHandler<DegenerateContext> commandHandler,
-            ApplicationContextWrapper applicationContextWrapper,
-            PrefixService prefixService) {
+        GatewayDiscordClient gatewayDiscordClient,
+        ReactiveCommandHandler<DegenerateContext> commandHandler,
+        ApplicationContextWrapper applicationContextWrapper,
+        PrefixService prefixService) {
         super(MessageCreateEvent.class, gatewayDiscordClient);
         this.commandHandler = commandHandler;
         this.applicationContextWrapper = applicationContextWrapper;
@@ -51,7 +52,7 @@ public class MessageCreateListener extends DiscordListener<MessageCreateEvent> {
         return !message.getAuthor().map(User::isBot).orElse(false);
     }
 
-    private Mono<Message> executeCommand(Message message, TextChannel channel, String command) {
+    private Mono<Void> executeCommand(Message message, TextChannel channel, String command) {
         logger.info("Executing {}", command);
 
         var context = new DegenerateContext(
@@ -65,16 +66,27 @@ public class MessageCreateListener extends DiscordListener<MessageCreateEvent> {
                 logger.info("Got result {}", result);
 
                 if (result instanceof DiscordResult discordResult) {
-                    return discordResult.sendMessage();
+                    return discordResult.execute();
                 } else if (!(result instanceof CommandNotFoundResult) && !result.success()) {
                     if (result instanceof ExceptionResult exceptionResult) {
                         logger.error("An exception was thrown", exceptionResult.exception());
                     }
 
-                    return channel.createMessage(result.toString());
+                    return channel.createMessage(result.toString()).then();
                 }
 
                 return Mono.empty();
-            });
+            })
+            .doOnError(ex -> logger.error("An exception was thrown when trying to execute a command", ex))
+            .onErrorResume(ex ->
+                context.channel.createMessage(spec ->
+                    spec.setMessageReference(context.message.getId())
+                        .setAllowedMentions(AllowedMentions.suppressAll())
+                        .setContent("An exception was thrown when trying to execute the command, ping the dev")
+                )
+                .doOnError(ohno -> logger.error("Couldn't send a message to this channel", ohno))
+                .onErrorResume(swallow -> Mono.empty())
+                .then()
+            );
     }
 }

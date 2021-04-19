@@ -15,7 +15,7 @@ public abstract class DiscordListener<T extends Event> {
         gatewayDiscordClient.getEventDispatcher()
             .on(cl)
             .flatMap(this::handle)
-            .subscribe(v -> {}, ex -> logger.error("An exception was thrown when handling an event", ex));
+            .subscribe();
     }
 
     public abstract Mono<Void> handle(T event);
