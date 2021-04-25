@@ -20,7 +20,7 @@ public class RssFeedSubscriptionTypeParser extends DegenerateTypeParser<Persiste
         return feedTypeParser.parse(context, command, input)
             .flatMap(result -> {
                 if (!result.success()) {
-                    return monoFailure(((FailedResult) result).reason());
+                    return failure(((FailedResult) result).reason()).mono();
                 }
 
                 return context.guild()
@@ -34,7 +34,7 @@ public class RssFeedSubscriptionTypeParser extends DegenerateTypeParser<Persiste
                             return success(persistedFeedSubscription);
                         }
 
-                        return failure("");
+                        return failure("This guild isn't subscribed to %s", feed.getName());
                     });
             });
     }

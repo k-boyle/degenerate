@@ -14,6 +14,7 @@ import kboyle.degenerate.persistence.dao.PersistedGuildRepository;
 import kboyle.degenerate.persistence.entities.PersistedFeedSubscription;
 import kboyle.degenerate.persistence.entities.PersistedGuild;
 import kboyle.degenerate.persistence.entities.PersistedRssFeed;
+import kboyle.degenerate.wrapper.PatternWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,6 @@ import reactor.core.scheduler.Schedulers;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.*;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -123,6 +123,7 @@ public class RssService {
             Set<String> fetchedGuids,
             Set<String> lastGuids) {
         var diff = Sets.difference(lastGuids, fetchedGuids);
+        // todo swap diff and delete
         logger.debug("Found {} diffs for {}", diff.size(), subscription.getChannelId());
 
         if (diff.isEmpty()) {
@@ -148,12 +149,12 @@ public class RssService {
             && itemMatches(item.getDescription(), subscription.getDescriptionRegexes(), true);
     }
 
-    private Boolean itemMatches(Optional<String> item, Set<Pattern> regexes, boolean fallback) {
+    private Boolean itemMatches(Optional<String> item, Set<PatternWrapper> regexes, boolean fallback) {
         return item.map(str -> itemMatches(str, regexes)).orElse(fallback);
     }
 
-    private static boolean itemMatches(String item, Set<Pattern> regexes) {
-        return regexes.isEmpty() || regexes.stream().anyMatch(regex -> regex.matcher(item).find());
+    private static boolean itemMatches(String item, Set<PatternWrapper> regexes) {
+        return regexes.isEmpty() || regexes.stream().anyMatch(regex -> regex.match(item));
     }
 
     private HashMultimap<PersistedRssFeed, GuildWithSubscription> getSubscriptionsByFeed() {
@@ -182,7 +183,7 @@ public class RssService {
                 .orElse("There was no title/url, visit the site directly");
 
             embed.setColor(DEGENERATE_COLOUR)
-                .setTitle("There is a new post on " + subscription.getFeed().getUrl())
+                .setTitle("There is a new post on " + subscription.getFeed().getName())
                 .setDescription(description);
         });
     }

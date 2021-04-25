@@ -15,5 +15,7 @@ import javax.persistence.Table;
 @NoArgsConstructor
 public class PersistedRssFeed {
     @Id
+    private String name;
+
     private String url;
 }

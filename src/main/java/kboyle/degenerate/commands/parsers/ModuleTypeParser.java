@@ -18,8 +18,9 @@ public class ModuleTypeParser extends DegenerateTypeParser<ReactiveModule> {
         return getAllModules(handler)
             .filter(module -> matchingModule(input, module))
             .findFirst()
-            .map(this::monoSuccess)
-            .orElseGet(() -> monoFailure("Failed to find a module matching input %s", input));
+            .map(this::success)
+            .orElseGet(() -> failure("Failed to find a module matching input %s", input))
+            .mono();
     }
 
     private boolean matchingModule(String input, ReactiveModule module) {

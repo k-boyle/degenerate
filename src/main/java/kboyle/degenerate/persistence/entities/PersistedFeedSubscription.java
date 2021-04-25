@@ -1,22 +1,18 @@
 package kboyle.degenerate.persistence.entities;
 
 import kboyle.degenerate.persistence.converters.PatternConverter;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import kboyle.degenerate.wrapper.PatternWrapper;
+import lombok.*;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 @Entity
 @Table(name = "subscribed_feeds")
 @Data
 @RequiredArgsConstructor
 @NoArgsConstructor
-public class PersistedFeedSubscription implements Serializable {
+public class PersistedFeedSubscription {
     @Id
     @GeneratedValue
     private long id;
@@ -28,18 +24,21 @@ public class PersistedFeedSubscription implements Serializable {
     @ElementCollection(fetch = FetchType.EAGER)
     @Convert(converter = PatternConverter.class)
     @NonNull
-    private Set<Pattern> titleRegexes;
+    @EqualsAndHashCode.Exclude
+    private Set<PatternWrapper> titleRegexes;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Convert(converter = PatternConverter.class)
     @NonNull
-    private Set<Pattern> descriptionRegexes;
+    @EqualsAndHashCode.Exclude
+    private Set<PatternWrapper> descriptionRegexes;
 
     @NonNull
     private Long channelId;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @NonNull
+    @EqualsAndHashCode.Exclude
     private Set<String> lastGuids;
 
     @NonNull

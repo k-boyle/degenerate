@@ -23,10 +23,10 @@ public class MessageCreateListener extends DiscordListener<MessageCreateEvent> {
     private final PrefixService prefixService;
 
     public MessageCreateListener(
-        GatewayDiscordClient gatewayDiscordClient,
-        ReactiveCommandHandler<DegenerateContext> commandHandler,
-        ApplicationContextWrapper applicationContextWrapper,
-        PrefixService prefixService) {
+            GatewayDiscordClient gatewayDiscordClient,
+            ReactiveCommandHandler<DegenerateContext> commandHandler,
+            ApplicationContextWrapper applicationContextWrapper,
+            PrefixService prefixService) {
         super(MessageCreateEvent.class, gatewayDiscordClient);
         this.commandHandler = commandHandler;
         this.applicationContextWrapper = applicationContextWrapper;
@@ -77,7 +77,6 @@ public class MessageCreateListener extends DiscordListener<MessageCreateEvent> {
 
                 return Mono.empty();
             })
-            .doOnError(ex -> logger.error("An exception was thrown when trying to execute a command", ex))
             .onErrorResume(ex ->
                 context.channel.createMessage(spec ->
                     spec.setMessageReference(context.message.getId())

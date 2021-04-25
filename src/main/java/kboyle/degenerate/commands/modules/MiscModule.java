@@ -1,6 +1,5 @@
 package kboyle.degenerate.commands.modules;
 
-import discord4j.core.object.entity.channel.TextChannel;
 import kboyle.degenerate.commands.DegenerateContext;
 import kboyle.degenerate.commands.DegenerateModule;
 import kboyle.degenerate.commands.preconditions.RequireBotOwner;
@@ -11,6 +10,7 @@ import kboyle.oktane.reactive.module.annotations.Aliases;
 import kboyle.oktane.reactive.module.annotations.Name;
 import kboyle.oktane.reactive.module.annotations.Remainder;
 import kboyle.oktane.reactive.module.annotations.Require;
+import kboyle.oktane.reactive.processor.OktaneModule;
 import kboyle.oktane.reactive.results.command.CommandResult;
 import reactor.core.publisher.Mono;
 
@@ -22,6 +22,7 @@ import static kboyle.degenerate.Constants.DEGENERATE_COLOUR;
 import static kboyle.degenerate.Markdown.CODE;
 
 @Name("Misc")
+@OktaneModule
 public class MiscModule extends DegenerateModule {
     private final ReactiveCommandHandler<DegenerateContext> commandHandler;
 
@@ -30,25 +31,20 @@ public class MiscModule extends DegenerateModule {
     }
 
     @Aliases("ping")
-    public Mono<CommandResult> ping() {
+    public CommandResult ping() {
         return reply("pong");
     }
 
     @Aliases("owner")
     @Require(precondition = RequireBotOwner.class)
-    public Mono<CommandResult> owner() {
+    public CommandResult owner() {
         return reply("ur cute");
-    }
-
-    @Aliases("channel")
-    public Mono<CommandResult> channel(TextChannel channel) {
-        return reply(channel.getName());
     }
 
     @Aliases("help")
     public Mono<CommandResult> help() {
         return context().client.getSelf()
-            .flatMap(degenerate ->
+            .map(degenerate ->
                 createMessage(messageSpec ->
                     messageSpec.setEmbed(embedSpec -> {
                         var moduleNames = commandHandler.modules().stream()
@@ -69,7 +65,7 @@ public class MiscModule extends DegenerateModule {
     @Aliases("module")
     public Mono<CommandResult> help(@Remainder ReactiveModule module) {
         return context().client.getSelf()
-            .flatMap(degenerate ->
+            .map(degenerate ->
                 createMessage(messageSpec ->
                     messageSpec.setEmbed(embedSpec -> {
                         var description = module.description.orElse("Ping the dev to add a description >:[");
@@ -129,7 +125,7 @@ public class MiscModule extends DegenerateModule {
     }
 
     @Aliases("command")
-    public Mono<CommandResult> help(@Remainder List<ReactiveCommand> commands) {
+    public CommandResult help(@Remainder List<ReactiveCommand> commands) {
         return reply("not done yet lol");
     }
 
@@ -141,6 +137,6 @@ public class MiscModule extends DegenerateModule {
     @Aliases("purge")
     public Mono<CommandResult> purge(int count) {
         return context().channel.bulkDeleteMessages(context().channel.getMessagesBefore(context().message.getId()).take(count))
-            .then(embed("Deleted %d messages", count));
+            .then(embed("Deleted %d messages", count).mono());
     }
 }

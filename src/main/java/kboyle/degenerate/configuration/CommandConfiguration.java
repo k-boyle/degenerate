@@ -4,6 +4,9 @@ import com.google.common.reflect.TypeToken;
 import discord4j.core.object.entity.channel.TextChannel;
 import kboyle.degenerate.commands.ApplicationContextWrapper;
 import kboyle.degenerate.commands.DegenerateContext;
+import kboyle.degenerate.commands.modules.FeedModule;
+import kboyle.degenerate.commands.modules.MiscModule;
+import kboyle.degenerate.commands.modules.PrefixModule;
 import kboyle.degenerate.commands.parsers.*;
 import kboyle.degenerate.persistence.entities.PersistedFeedSubscription;
 import kboyle.degenerate.persistence.entities.PersistedRssFeed;
@@ -26,7 +29,9 @@ public class CommandConfiguration {
     @Bean
     public ReactiveCommandHandler<DegenerateContext> commandHandler() {
         return ReactiveCommandHandler.<DegenerateContext>builder()
-            .withModules(DegenerateContext.class)
+            .withModule(MiscModule.class)
+            .withModule(FeedModule.class)
+            .withModule(PrefixModule.class)
             // todo use spring to get parsers
             .withTypeParser(TextChannel.class, new TextChannelTypeParser())
             .withTypeParser(PersistedRssFeed.class, new RssFeedTypeParser())

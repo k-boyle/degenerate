@@ -12,7 +12,8 @@ public class RssFeedTypeParser extends DegenerateTypeParser<PersistedRssFeed> {
     public Mono<TypeParserResult<PersistedRssFeed>> parse(DegenerateContext context, ReactiveCommand command, String input) {
         return context.beanProvider().getBean(PersistedRssFeedRepository.class)
             .findById(input)
-            .map(this::monoSuccess)
-            .orElseGet(() -> monoFailure("Failed to find a feed with url %s", input));
+            .map(this::success)
+            .orElseGet(() -> failure("Failed to find a feed with name %s", input))
+            .mono();
     }
 }

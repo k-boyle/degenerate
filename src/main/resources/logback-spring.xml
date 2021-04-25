@@ -3,7 +3,7 @@
     <logger name="io.netty" level="INFO"/>
     <logger name="reactor" level="INFO"/>
     <logger name="org.springframework" level="INFO"/>
-    <logger name="kboyle.degenerate" level="DEBUG"/>
+    <logger name="kboyle.degenerate" level="INFO"/>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>

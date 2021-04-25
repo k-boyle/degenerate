@@ -9,13 +9,22 @@ import reactor.core.publisher.Mono;
 public abstract class DiscordListener<T extends Event> {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    public DiscordListener(Class<T> cl, GatewayDiscordClient gatewayDiscordClient) {
-        logger.info("Adding listener for {}", cl);
+    private final Class<T> eventType;
+
+    public DiscordListener(Class<T> eventType, GatewayDiscordClient gatewayDiscordClient) {
+        this.eventType = eventType;
+        logger.info("Adding listener for {}", eventType);
 
         gatewayDiscordClient.getEventDispatcher()
-            .on(cl)
+            .on(eventType)
             .flatMap(this::handle)
+            .doOnError(this::onError)
+            .onErrorResume(ex -> Mono.empty())
             .subscribe();
+    }
+
+    public void onError(Throwable ex) {
+        logger.error("An error was thrown when trying to execute event {}", eventType, ex);
     }
 
     public abstract Mono<Void> handle(T event);

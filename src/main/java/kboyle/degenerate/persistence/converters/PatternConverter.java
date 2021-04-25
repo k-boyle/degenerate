@@ -1,16 +1,17 @@
 package kboyle.degenerate.persistence.converters;
 
-import javax.persistence.AttributeConverter;
-import java.util.regex.Pattern;
+import kboyle.degenerate.wrapper.PatternWrapper;
 
-public class PatternConverter implements AttributeConverter<Pattern, String> {
+import javax.persistence.AttributeConverter;
+
+public class PatternConverter implements AttributeConverter<PatternWrapper, String> {
     @Override
-    public String convertToDatabaseColumn(Pattern pattern) {
-        return pattern.pattern();
+    public String convertToDatabaseColumn(PatternWrapper pattern) {
+        return pattern.regex();
     }
 
     @Override
-    public Pattern convertToEntityAttribute(String regex) {
-        return Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    public PatternWrapper convertToEntityAttribute(String regex) {
+        return new PatternWrapper(regex);
     }
 }

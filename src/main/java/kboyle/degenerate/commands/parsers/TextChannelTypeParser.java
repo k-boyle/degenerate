@@ -31,7 +31,7 @@ public class TextChannelTypeParser extends DegenerateTypeParser<TextChannel> {
             .ofType(TextChannel.class)
             .filter(channel -> channel.getId().asLong() == finalId || channel.getName().equalsIgnoreCase(input))
             .next()
-            .flatMap(this::monoSuccess)
-            .switchIfEmpty(Mono.defer(() -> monoFailure("Failed to find channel matching %s, try mentioning it", input)));
+            .map(this::success)
+            .switchIfEmpty(Mono.defer(() -> failure("Failed to find channel matching %s, try mentioning it", input).mono()));
     }
 }

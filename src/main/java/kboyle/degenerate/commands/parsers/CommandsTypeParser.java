@@ -22,9 +22,11 @@ public class CommandsTypeParser implements ReactiveTypeParser<List<ReactiveComma
             .filter(command -> matchingCommand(input, command))
             .collect(Collectors.toList());
 
-        return commands.isEmpty()
-            ? monoFailure("Failed to find any commands matching input %s", input)
-            : monoSuccess(commands);
+        var result = commands.isEmpty()
+            ? failure("Failed to find any commands matching input %s", input)
+            : success(commands);
+
+        return result.mono();
     }
 
     private boolean matchingCommand(String input, ReactiveCommand command) {

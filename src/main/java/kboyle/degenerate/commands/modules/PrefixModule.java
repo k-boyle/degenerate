@@ -7,12 +7,14 @@ import kboyle.oktane.reactive.module.annotations.Aliases;
 import kboyle.oktane.reactive.module.annotations.Description;
 import kboyle.oktane.reactive.module.annotations.Name;
 import kboyle.oktane.reactive.module.annotations.Require;
+import kboyle.oktane.reactive.processor.OktaneModule;
 import kboyle.oktane.reactive.results.command.CommandResult;
 import reactor.core.publisher.Mono;
 
 @Aliases({"prefix", "p"})
 @Description("Mange the prefixes for your guild")
 @Name("Prefix Management")
+@OktaneModule
 public class PrefixModule extends DegenerateModule {
     private final PrefixService prefixService;
 
@@ -24,7 +26,7 @@ public class PrefixModule extends DegenerateModule {
     @Require(precondition = RequireUserPermission.class, arguments = "ADMINISTRATOR")
     public Mono<CommandResult> addPrefix(String prefix) {
         return context().guild()
-            .flatMap(guild -> {
+            .map(guild -> {
                 var result = prefixService.addPrefix(guild, prefix);
 
                 if (result) {
@@ -39,7 +41,7 @@ public class PrefixModule extends DegenerateModule {
     @Require(precondition = RequireUserPermission.class, arguments = "ADMINISTRATOR")
     public Mono<CommandResult> removePrefix(String prefix) {
         return context().guild()
-            .flatMap(guild -> {
+            .map(guild -> {
                 var result = prefixService.removePrefix(guild, prefix);
 
                 if (result) {
@@ -53,7 +55,7 @@ public class PrefixModule extends DegenerateModule {
     @Aliases({"list", "l", "ls"})
     public Mono<CommandResult> listPrefixes() {
         return context().guild()
-            .flatMap(guild -> {
+            .map(guild -> {
                 var prefixes = prefixService.getPrefixes(guild);
 
                 if (prefixes.isEmpty()) {
