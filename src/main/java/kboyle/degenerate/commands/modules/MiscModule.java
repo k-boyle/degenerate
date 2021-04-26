@@ -3,13 +3,12 @@ package kboyle.degenerate.commands.modules;
 import kboyle.degenerate.commands.DegenerateContext;
 import kboyle.degenerate.commands.DegenerateModule;
 import kboyle.degenerate.commands.preconditions.RequireBotOwner;
+import kboyle.degenerate.commands.preconditions.RequireBotPermission;
+import kboyle.degenerate.commands.preconditions.RequireUserPermission;
 import kboyle.oktane.core.CommandHandler;
 import kboyle.oktane.core.module.Command;
 import kboyle.oktane.core.module.CommandModule;
-import kboyle.oktane.core.module.annotations.Aliases;
-import kboyle.oktane.core.module.annotations.Name;
-import kboyle.oktane.core.module.annotations.Remainder;
-import kboyle.oktane.core.module.annotations.Require;
+import kboyle.oktane.core.module.annotations.*;
 import kboyle.oktane.core.processor.OktaneModule;
 import kboyle.oktane.core.results.command.CommandResult;
 import reactor.core.publisher.Mono;
@@ -135,6 +134,11 @@ public class MiscModule extends DegenerateModule {
     }
 
     @Aliases("purge")
+    @RequireAny({
+        @Require(precondition = RequireUserPermission.class, arguments = "MANAGE_MESSAGES"),
+        @Require(precondition = RequireBotOwner.class)
+    })
+    @Require(precondition = RequireBotPermission.class, arguments = "MANAGE_MESSAGES")
     public Mono<CommandResult> purge(int count) {
         return context().channel.bulkDeleteMessages(context().channel.getMessagesBefore(context().message.getId()).take(count))
             .then(embed("Deleted %d messages", count).mono());

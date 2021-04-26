@@ -5,6 +5,7 @@ import com.apptastic.rssreader.RssReader;
 import discord4j.core.object.entity.channel.TextChannel;
 import kboyle.degenerate.commands.DegenerateModule;
 import kboyle.degenerate.commands.preconditions.RequireBotOwner;
+import kboyle.degenerate.commands.preconditions.RequireUserPermission;
 import kboyle.degenerate.persistence.dao.PersistedGuildRepository;
 import kboyle.degenerate.persistence.dao.PersistedRssFeedRepository;
 import kboyle.degenerate.persistence.dao.PersistedSubscriptionRepository;
@@ -63,11 +64,19 @@ public class FeedModule extends DegenerateModule {
     }
 
     @Aliases({"subscribe", "sub"})
+    @RequireAny({
+        @Require(precondition = RequireUserPermission.class, arguments = "ADMINISTRATOR"),
+        @Require(precondition = RequireBotOwner.class)
+    })
     public Mono<CommandResult> subscribe(@Remainder PersistedRssFeed feed) {
         return subscribe(context().channel, feed);
     }
 
     @Aliases({"subscribe", "sub"})
+    @RequireAny({
+        @Require(precondition = RequireUserPermission.class, arguments = "ADMINISTRATOR"),
+        @Require(precondition = RequireBotOwner.class)
+    })
     public Mono<CommandResult> subscribe(TextChannel channel, @Remainder PersistedRssFeed feed) {
         return context().guild()
             .flatMap(guild -> {
@@ -103,6 +112,10 @@ public class FeedModule extends DegenerateModule {
     }
 
     @Aliases({"unsubscribe", "unsub"})
+    @RequireAny({
+        @Require(precondition = RequireUserPermission.class, arguments = "ADMINISTRATOR"),
+        @Require(precondition = RequireBotOwner.class)
+    })
     public Mono<CommandResult> unsubscribe(@Remainder PersistedFeedSubscription subscription) {
         return context().guild()
             .map(guild -> {
@@ -167,6 +180,10 @@ public class FeedModule extends DegenerateModule {
 
         @Aliases({"add", "a"})
         @Name("Add Filter")
+        @RequireAny({
+            @Require(precondition = RequireUserPermission.class, arguments = "ADMINISTRATOR"),
+            @Require(precondition = RequireBotOwner.class)
+        })
         @OktaneModule
         public static class FeedAddFilterModule extends DegenerateModule {
             private final PersistedSubscriptionRepository repo;
@@ -200,6 +217,10 @@ public class FeedModule extends DegenerateModule {
 
         @Aliases({"remove", "rm", "r"})
         @Name("Remove Filter")
+        @RequireAny({
+            @Require(precondition = RequireUserPermission.class, arguments = "ADMINISTRATOR"),
+            @Require(precondition = RequireBotOwner.class)
+        })
         @OktaneModule
         public static class FeedRemoveFilterModule extends DegenerateModule {
             private final PersistedSubscriptionRepository repo;

@@ -1,5 +1,6 @@
 package kboyle.degenerate.commands.preconditions;
 
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
@@ -10,10 +11,10 @@ import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 
-public class RequireUserPermission extends DegeneratePrecondition {
+public class RequireBotPermission extends DegeneratePrecondition {
     private final PermissionSet permissions;
 
-    public RequireUserPermission(String[] permissions) {
+    public RequireBotPermission(String[] permissions) {
         var rawValue = Arrays.stream(permissions)
             .map(Permission::valueOf)
             .mapToLong(Permission::getValue)
@@ -23,10 +24,11 @@ public class RequireUserPermission extends DegeneratePrecondition {
 
     @Override
     protected Mono<PreconditionResult> run(DegenerateContext context, Command command) {
-        return context.author()
+        return context.guild()
+            .flatMap(Guild::getSelfMember)
             .flatMap(Member::getBasePermissions)
-            .map(userPerms -> {
-                if (userPerms.and(permissions).equals(permissions)) {
+            .map(botPerms -> {
+                if (botPerms.and(permissions).equals(permissions)) {
                     return success();
                 }
 
