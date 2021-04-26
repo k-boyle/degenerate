@@ -3,13 +3,13 @@ package kboyle.degenerate.commands.parsers;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.channel.TextChannel;
 import kboyle.degenerate.commands.DegenerateContext;
-import kboyle.oktane.reactive.module.ReactiveCommand;
-import kboyle.oktane.reactive.results.typeparser.TypeParserResult;
+import kboyle.oktane.core.module.Command;
+import kboyle.oktane.core.results.typeparser.TypeParserResult;
 import reactor.core.publisher.Mono;
 
 public class TextChannelTypeParser extends DegenerateTypeParser<TextChannel> {
     @Override
-    public Mono<TypeParserResult<TextChannel>> parse(DegenerateContext context, ReactiveCommand command, String input) {
+    public Mono<TypeParserResult<TextChannel>> parse(DegenerateContext context, Command command, String input) {
         long id = -1;
 
         if (input.length() > 16 && input.charAt(0) == '<' && input.charAt(1) == '#') {

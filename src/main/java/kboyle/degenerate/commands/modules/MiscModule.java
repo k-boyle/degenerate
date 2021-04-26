@@ -3,15 +3,15 @@ package kboyle.degenerate.commands.modules;
 import kboyle.degenerate.commands.DegenerateContext;
 import kboyle.degenerate.commands.DegenerateModule;
 import kboyle.degenerate.commands.preconditions.RequireBotOwner;
-import kboyle.oktane.reactive.ReactiveCommandHandler;
-import kboyle.oktane.reactive.module.ReactiveCommand;
-import kboyle.oktane.reactive.module.ReactiveModule;
-import kboyle.oktane.reactive.module.annotations.Aliases;
-import kboyle.oktane.reactive.module.annotations.Name;
-import kboyle.oktane.reactive.module.annotations.Remainder;
-import kboyle.oktane.reactive.module.annotations.Require;
-import kboyle.oktane.reactive.processor.OktaneModule;
-import kboyle.oktane.reactive.results.command.CommandResult;
+import kboyle.oktane.core.CommandHandler;
+import kboyle.oktane.core.module.Command;
+import kboyle.oktane.core.module.CommandModule;
+import kboyle.oktane.core.module.annotations.Aliases;
+import kboyle.oktane.core.module.annotations.Name;
+import kboyle.oktane.core.module.annotations.Remainder;
+import kboyle.oktane.core.module.annotations.Require;
+import kboyle.oktane.core.processor.OktaneModule;
+import kboyle.oktane.core.results.command.CommandResult;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -24,9 +24,9 @@ import static kboyle.degenerate.Markdown.CODE;
 @Name("Misc")
 @OktaneModule
 public class MiscModule extends DegenerateModule {
-    private final ReactiveCommandHandler<DegenerateContext> commandHandler;
+    private final CommandHandler<DegenerateContext> commandHandler;
 
-    public MiscModule(ReactiveCommandHandler<DegenerateContext> commandHandler) {
+    public MiscModule(CommandHandler<DegenerateContext> commandHandler) {
         this.commandHandler = commandHandler;
     }
 
@@ -63,7 +63,7 @@ public class MiscModule extends DegenerateModule {
     }
 
     @Aliases("module")
-    public Mono<CommandResult> help(@Remainder ReactiveModule module) {
+    public Mono<CommandResult> help(@Remainder CommandModule module) {
         return context().client.getSelf()
             .map(degenerate ->
                 createMessage(messageSpec ->
@@ -125,7 +125,7 @@ public class MiscModule extends DegenerateModule {
     }
 
     @Aliases("command")
-    public CommandResult help(@Remainder List<ReactiveCommand> commands) {
+    public CommandResult help(@Remainder List<Command> commands) {
         return reply("not done yet lol");
     }
 

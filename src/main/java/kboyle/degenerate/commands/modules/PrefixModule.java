@@ -3,12 +3,12 @@ package kboyle.degenerate.commands.modules;
 import kboyle.degenerate.commands.DegenerateModule;
 import kboyle.degenerate.commands.preconditions.RequireUserPermission;
 import kboyle.degenerate.services.PrefixService;
-import kboyle.oktane.reactive.module.annotations.Aliases;
-import kboyle.oktane.reactive.module.annotations.Description;
-import kboyle.oktane.reactive.module.annotations.Name;
-import kboyle.oktane.reactive.module.annotations.Require;
-import kboyle.oktane.reactive.processor.OktaneModule;
-import kboyle.oktane.reactive.results.command.CommandResult;
+import kboyle.oktane.core.module.annotations.Aliases;
+import kboyle.oktane.core.module.annotations.Description;
+import kboyle.oktane.core.module.annotations.Name;
+import kboyle.oktane.core.module.annotations.Require;
+import kboyle.oktane.core.processor.OktaneModule;
+import kboyle.oktane.core.results.command.CommandResult;
 import reactor.core.publisher.Mono;
 
 @Aliases({"prefix", "p"})

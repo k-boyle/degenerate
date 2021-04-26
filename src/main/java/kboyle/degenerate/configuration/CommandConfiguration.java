@@ -10,9 +10,9 @@ import kboyle.degenerate.commands.modules.PrefixModule;
 import kboyle.degenerate.commands.parsers.*;
 import kboyle.degenerate.persistence.entities.PersistedFeedSubscription;
 import kboyle.degenerate.persistence.entities.PersistedRssFeed;
-import kboyle.oktane.reactive.ReactiveCommandHandler;
-import kboyle.oktane.reactive.module.ReactiveCommand;
-import kboyle.oktane.reactive.module.ReactiveModule;
+import kboyle.oktane.core.CommandHandler;
+import kboyle.oktane.core.module.Command;
+import kboyle.oktane.core.module.CommandModule;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,8 +27,8 @@ public class CommandConfiguration {
     }
 
     @Bean
-    public ReactiveCommandHandler<DegenerateContext> commandHandler() {
-        return ReactiveCommandHandler.<DegenerateContext>builder()
+    public CommandHandler<DegenerateContext> commandHandler() {
+        return CommandHandler.<DegenerateContext>builder()
             .withModule(MiscModule.class)
             .withModule(FeedModule.class)
             .withModule(PrefixModule.class)
@@ -36,13 +36,13 @@ public class CommandConfiguration {
             .withTypeParser(TextChannel.class, new TextChannelTypeParser())
             .withTypeParser(PersistedRssFeed.class, new RssFeedTypeParser())
             .withTypeParser(PersistedFeedSubscription.class, new RssFeedSubscriptionTypeParser())
-            .withTypeParser(ReactiveModule.class, new ModuleTypeParser())
+            .withTypeParser(CommandModule.class, new ModuleTypeParser())
             .withTypeParser(getCommandListType(), new CommandsTypeParser())
             .build();
     }
 
     @SuppressWarnings("unchecked")
-    private Class<List<ReactiveCommand>> getCommandListType() {
-        return (Class<List<ReactiveCommand>>) new TypeToken<List<ReactiveCommand>>() { }.getRawType();
+    private Class<List<Command>> getCommandListType() {
+        return (Class<List<Command>>) new TypeToken<List<Command>>() { }.getRawType();
     }
 }

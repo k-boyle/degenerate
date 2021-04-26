@@ -11,9 +11,10 @@ import kboyle.degenerate.persistence.dao.PersistedSubscriptionRepository;
 import kboyle.degenerate.persistence.entities.PersistedFeedSubscription;
 import kboyle.degenerate.persistence.entities.PersistedRssFeed;
 import kboyle.degenerate.wrapper.PatternWrapper;
-import kboyle.oktane.reactive.module.annotations.*;
-import kboyle.oktane.reactive.processor.OktaneModule;
-import kboyle.oktane.reactive.results.command.CommandResult;
+import kboyle.oktane.core.module.annotations.*;
+import kboyle.oktane.core.processor.OktaneModule;
+import kboyle.oktane.core.results.command.CommandResult;
+import lombok.SneakyThrows;
 import reactor.core.publisher.Mono;
 
 import java.util.HashSet;
@@ -34,6 +35,13 @@ public class FeedModule extends DegenerateModule {
         this.guildRepo = guildRepo;
         this.feedRepo = feedRepo;
         this.rssReader = rssReader;
+    }
+
+    @SneakyThrows
+    @Aliases("preview")
+    public CommandResult preview(String url) {
+        var feed = rssReader.read(url);
+        return nop();
     }
 
     @Aliases({"add", "a"})

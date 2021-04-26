@@ -1,6 +1,6 @@
 package kboyle.degenerate.commands;
 
-import kboyle.oktane.reactive.BeanProvider;
+import kboyle.oktane.core.BeanProvider;
 import org.springframework.context.ApplicationContext;
 
 public class ApplicationContextWrapper implements BeanProvider {

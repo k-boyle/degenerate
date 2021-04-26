@@ -5,7 +5,7 @@ import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.rest.util.AllowedMentions;
 import kboyle.degenerate.Constants;
-import kboyle.oktane.reactive.module.ReactiveCommand;
+import kboyle.oktane.core.module.Command;
 import reactor.core.publisher.Mono;
 
 public class DiscordEmbedResult extends DiscordResult {
@@ -13,7 +13,7 @@ public class DiscordEmbedResult extends DiscordResult {
     private final String content;
     private final Snowflake messageRef;
 
-    public DiscordEmbedResult(ReactiveCommand command, TextChannel channel, String content, Snowflake messageRef) {
+    public DiscordEmbedResult(Command command, TextChannel channel, String content, Snowflake messageRef) {
         super(command);
         this.channel = channel;
         this.content = content;

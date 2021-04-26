@@ -10,21 +10,21 @@ import kboyle.degenerate.commands.ApplicationContextWrapper;
 import kboyle.degenerate.commands.DegenerateContext;
 import kboyle.degenerate.commands.results.DiscordResult;
 import kboyle.degenerate.services.PrefixService;
-import kboyle.oktane.reactive.ReactiveCommandHandler;
-import kboyle.oktane.reactive.results.ExceptionResult;
-import kboyle.oktane.reactive.results.search.CommandNotFoundResult;
+import kboyle.oktane.core.CommandHandler;
+import kboyle.oktane.core.results.ExceptionResult;
+import kboyle.oktane.core.results.search.CommandNotFoundResult;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 @Component
 public class MessageCreateListener extends DiscordListener<MessageCreateEvent> {
-    private final ReactiveCommandHandler<DegenerateContext> commandHandler;
+    private final CommandHandler<DegenerateContext> commandHandler;
     private final ApplicationContextWrapper applicationContextWrapper;
     private final PrefixService prefixService;
 
     public MessageCreateListener(
             GatewayDiscordClient gatewayDiscordClient,
-            ReactiveCommandHandler<DegenerateContext> commandHandler,
+            CommandHandler<DegenerateContext> commandHandler,
             ApplicationContextWrapper applicationContextWrapper,
             PrefixService prefixService) {
         super(MessageCreateEvent.class, gatewayDiscordClient);

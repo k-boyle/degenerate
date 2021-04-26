@@ -4,7 +4,7 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.rest.util.AllowedMentions;
-import kboyle.oktane.reactive.module.ReactiveCommand;
+import kboyle.oktane.core.module.Command;
 import reactor.core.publisher.Mono;
 
 import java.util.function.Consumer;
@@ -15,7 +15,7 @@ public class DiscordCreateMessageResult extends DiscordResult {
     private final Consumer<MessageCreateSpec> specConsumer;
 
     public DiscordCreateMessageResult(
-            ReactiveCommand command,
+        Command command,
             Snowflake messageRef,
             TextChannel channel,
             Consumer<MessageCreateSpec> specConsumer) {

@@ -1,21 +1,20 @@
 package kboyle.degenerate.commands.parsers;
 
 import kboyle.degenerate.commands.DegenerateContext;
-import kboyle.oktane.reactive.ReactiveCommandHandler;
-import kboyle.oktane.reactive.module.ReactiveCommand;
-import kboyle.oktane.reactive.module.ReactiveModule;
-import kboyle.oktane.reactive.results.typeparser.TypeParserResult;
+import kboyle.oktane.core.CommandHandler;
+import kboyle.oktane.core.module.Command;
+import kboyle.oktane.core.module.CommandModule;
+import kboyle.oktane.core.results.typeparser.TypeParserResult;
 import reactor.core.publisher.Mono;
 
-import static kboyle.degenerate.Utils.getAllModules;
 import static kboyle.degenerate.Utils.insensitiveContains;
 
-public class ModuleTypeParser extends DegenerateTypeParser<ReactiveModule> {
+public class ModuleTypeParser extends DegenerateTypeParser<CommandModule> {
     @SuppressWarnings("unchecked")
     @Override
-    public Mono<TypeParserResult<ReactiveModule>> parse(DegenerateContext context, ReactiveCommand command, String input) {
-        var handler = (ReactiveCommandHandler<DegenerateContext>) context.beanProvider().getBean(ReactiveCommandHandler.class);
-        return getAllModules(handler)
+    public Mono<TypeParserResult<CommandModule>> parse(DegenerateContext context, Command command, String input) {
+        var handler = (CommandHandler<DegenerateContext>) context.beanProvider().getBean(CommandHandler.class);
+        return handler.flattenModules()
             .filter(module -> matchingModule(input, module))
             .findFirst()
             .map(this::success)
@@ -23,7 +22,7 @@ public class ModuleTypeParser extends DegenerateTypeParser<ReactiveModule> {
             .mono();
     }
 
-    private boolean matchingModule(String input, ReactiveModule module) {
+    private boolean matchingModule(String input, CommandModule module) {
         return insensitiveContains(module.name, input) || module.groups.stream().anyMatch(group -> insensitiveContains(group, input));
     }
 }

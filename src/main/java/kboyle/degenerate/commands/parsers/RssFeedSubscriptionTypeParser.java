@@ -3,9 +3,9 @@ package kboyle.degenerate.commands.parsers;
 import kboyle.degenerate.commands.DegenerateContext;
 import kboyle.degenerate.persistence.dao.PersistedGuildRepository;
 import kboyle.degenerate.persistence.entities.PersistedFeedSubscription;
-import kboyle.oktane.reactive.module.ReactiveCommand;
-import kboyle.oktane.reactive.results.FailedResult;
-import kboyle.oktane.reactive.results.typeparser.TypeParserResult;
+import kboyle.oktane.core.module.Command;
+import kboyle.oktane.core.results.FailedResult;
+import kboyle.oktane.core.results.typeparser.TypeParserResult;
 import reactor.core.publisher.Mono;
 
 public class RssFeedSubscriptionTypeParser extends DegenerateTypeParser<PersistedFeedSubscription> {
@@ -16,7 +16,7 @@ public class RssFeedSubscriptionTypeParser extends DegenerateTypeParser<Persiste
     }
 
     @Override
-    public Mono<TypeParserResult<PersistedFeedSubscription>> parse(DegenerateContext context, ReactiveCommand command, String input) {
+    public Mono<TypeParserResult<PersistedFeedSubscription>> parse(DegenerateContext context, Command command, String input) {
         return feedTypeParser.parse(context, command, input)
             .flatMap(result -> {
                 if (!result.success()) {

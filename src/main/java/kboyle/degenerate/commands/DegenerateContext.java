@@ -5,7 +5,7 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
-import kboyle.oktane.reactive.CommandContext;
+import kboyle.oktane.core.CommandContext;
 import reactor.core.publisher.Mono;
 
 public class DegenerateContext extends CommandContext {
