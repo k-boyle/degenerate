@@ -14,7 +14,6 @@ import kboyle.degenerate.wrapper.PatternWrapper;
 import kboyle.oktane.core.module.annotations.*;
 import kboyle.oktane.core.processor.OktaneModule;
 import kboyle.oktane.core.results.command.CommandResult;
-import lombok.SneakyThrows;
 import reactor.core.publisher.Mono;
 
 import java.util.HashSet;
@@ -37,13 +36,6 @@ public class FeedModule extends DegenerateModule {
         this.rssReader = rssReader;
     }
 
-    @SneakyThrows
-    @Aliases("preview")
-    public CommandResult preview(String url) {
-        var feed = rssReader.read(url);
-        return nop();
-    }
-
     @Aliases({"add", "a"})
     @Require(precondition = RequireBotOwner.class)
     public Mono<CommandResult> addFeed(String name, String url) {
@@ -61,6 +53,11 @@ public class FeedModule extends DegenerateModule {
     @Aliases({"remove", "rm", "r"})
     @Require(precondition = RequireBotOwner.class)
     public CommandResult removeFeed(@Remainder PersistedRssFeed feed) {
+        for (var persistedGuild : guildRepo.findAll()) {
+            persistedGuild.getSubscriptionByFeedUrl().remove(feed);
+            guildRepo.save(persistedGuild);
+        }
+
         feedRepo.delete(feed);
         return embed("Deleted feed %s", feed.getName());
     }
