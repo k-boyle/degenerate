@@ -12,6 +12,7 @@ import java.time.Duration;
 public class DegenerateConfig {
     private Discord discord;
     private Feed feed;
+    private Twitter twitter;
 
     @Getter
     @Setter
@@ -22,6 +23,18 @@ public class DegenerateConfig {
     @Getter
     @Setter
     public static class Feed {
+        private Duration pollingRate;
+        private boolean enabled;
+    }
+
+    @Getter
+    @Setter
+    public static class Twitter {
+        private String apiKey;
+        private String apiSecret;
+        private String accessToken;
+        private String accessTokenSecret;
+
         private Duration pollingRate;
         private boolean enabled;
     }

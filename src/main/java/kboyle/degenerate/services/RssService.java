@@ -99,7 +99,7 @@ public class RssService {
 
         logger.debug("Checking diffs for {}", subscription.getChannelId());
         var lastGuids = subscription.getLastGuids();
-        var newItems = getNewItems(fetchedItemByGuid, subscription, lastGuids, fetchedGuids);
+        var newItems = getNewItems(fetchedItemByGuid, subscription, fetchedGuids, lastGuids);
 
         logger.debug("Found {} matching items in {}", newItems.size(), subscription.getChannelId());
 
@@ -122,7 +122,7 @@ public class RssService {
             PersistedFeedSubscription subscription,
             Set<String> fetchedGuids,
             Set<String> lastGuids) {
-        var diff = Sets.difference(lastGuids, fetchedGuids);
+        var diff = Sets.difference(fetchedGuids, lastGuids);
         // todo swap diff and delete
         logger.debug("Found {} diffs for {}", diff.size(), subscription.getChannelId());
 

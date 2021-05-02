@@ -10,4 +10,8 @@ public enum Utils {
                 return true;
         return false;
     }
+
+    public static String getTweetUrl(String userId, String tweetId) {
+        return String.format("https://twitter.com/%s/status/%s", userId, tweetId);
+    }
 }

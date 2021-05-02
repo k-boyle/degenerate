@@ -1,5 +1,6 @@
 package kboyle.degenerate.configuration;
 
+import com.github.redouane59.twitter.dto.user.UserV2;
 import com.google.common.reflect.TypeToken;
 import discord4j.core.object.entity.channel.TextChannel;
 import kboyle.degenerate.commands.ApplicationContextWrapper;
@@ -7,6 +8,7 @@ import kboyle.degenerate.commands.DegenerateContext;
 import kboyle.degenerate.commands.modules.FeedModule;
 import kboyle.degenerate.commands.modules.MiscModule;
 import kboyle.degenerate.commands.modules.PrefixModule;
+import kboyle.degenerate.commands.modules.TwitterModule;
 import kboyle.degenerate.commands.parsers.*;
 import kboyle.degenerate.persistence.entities.PersistedFeedSubscription;
 import kboyle.degenerate.persistence.entities.PersistedRssFeed;
@@ -32,11 +34,12 @@ public class CommandConfiguration {
             .withModule(MiscModule.class)
             .withModule(FeedModule.class)
             .withModule(PrefixModule.class)
-            // todo use spring to get parsers
+            .withModule(TwitterModule.class)
             .withTypeParser(TextChannel.class, new TextChannelTypeParser())
             .withTypeParser(PersistedRssFeed.class, new RssFeedTypeParser())
             .withTypeParser(PersistedFeedSubscription.class, new RssFeedSubscriptionTypeParser())
             .withTypeParser(CommandModule.class, new ModuleTypeParser())
+            .withTypeParser(UserV2.class, new TwitterUserTypeParser())
             .withTypeParser(getCommandListType(), new CommandsTypeParser())
             .build();
     }

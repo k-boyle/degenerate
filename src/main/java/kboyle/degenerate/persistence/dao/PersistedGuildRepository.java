@@ -8,7 +8,7 @@ import java.util.HashSet;
 
 public interface PersistedGuildRepository extends LazyCrudRepository<PersistedGuild, Long> {
    default PersistedGuild createNew(Long id) {
-       return new PersistedGuild(id, new HashSet<>(), new HashMap<>());
+       return new PersistedGuild(id, new HashSet<>(), new HashMap<>(), new HashSet<>());
    }
 
    default PersistedGuild get(Guild guild) {

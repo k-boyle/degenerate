@@ -20,10 +20,9 @@ public class PersistedGuild {
     @ElementCollection(fetch = FetchType.EAGER)
     private Set<String> prefixes;
 
-    @OneToMany(
-        fetch = FetchType.EAGER,
-        cascade = CascadeType.ALL,
-        orphanRemoval = true
-    )
+    @OneToMany(fetch = FetchType.EAGER)
     private Map<PersistedRssFeed, PersistedFeedSubscription> subscriptionByFeedUrl;
+
+    @OneToMany(fetch = FetchType.EAGER)
+    private Set<PersistedTwitterSubscription> twitterSubscriptions;
 }
