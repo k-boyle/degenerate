@@ -1,28 +1,16 @@
 package kboyle.degenerate.commands;
 
-import discord4j.core.spec.MessageCreateSpec;
-import kboyle.degenerate.commands.results.DiscordCreateMessageResult;
-import kboyle.degenerate.commands.results.DiscordEmbedResult;
-import kboyle.degenerate.commands.results.DiscordReplyResult;
-import kboyle.oktane.core.module.ModuleBase;
+import kboyle.degenerate.Constants;
 import kboyle.oktane.core.results.command.CommandResult;
+import kboyle.oktane.discord4j.DiscordCommandContext;
+import kboyle.oktane.discord4j.module.DiscordModuleBase;
 
-import java.util.function.Consumer;
-
-public abstract class DegenerateModule extends ModuleBase<DegenerateContext> {
-    protected CommandResult reply(String content) {
-        return new DiscordReplyResult(context().command(), context().channel, content, context().message.getId());
-    }
-
+public abstract class DegenerateModule extends DiscordModuleBase<DiscordCommandContext> {
     protected CommandResult embed(String content) {
-        return new DiscordEmbedResult(context().command(), context().channel, content, context().message.getId());
+        return embed(spec -> spec.setDescription(content).setColor(Constants.DEGENERATE_COLOUR));
     }
 
     protected CommandResult embed(String content, Object... args) {
         return embed(String.format(content, args));
-    }
-
-    protected CommandResult createMessage(Consumer<MessageCreateSpec> specConsumer) {
-        return new DiscordCreateMessageResult(context().command(), context().message.getId(), context().channel, specConsumer);
     }
 }

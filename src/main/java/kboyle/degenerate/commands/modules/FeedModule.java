@@ -3,18 +3,22 @@ package kboyle.degenerate.commands.modules;
 import com.apptastic.rssreader.Item;
 import com.apptastic.rssreader.RssReader;
 import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.rest.util.Permission;
 import kboyle.degenerate.commands.DegenerateModule;
-import kboyle.degenerate.commands.preconditions.RequireBotOwner;
-import kboyle.degenerate.commands.preconditions.RequireUserPermission;
 import kboyle.degenerate.persistence.dao.PersistedGuildRepository;
 import kboyle.degenerate.persistence.dao.PersistedRssFeedRepository;
 import kboyle.degenerate.persistence.dao.PersistedSubscriptionRepository;
 import kboyle.degenerate.persistence.entities.PersistedFeedSubscription;
 import kboyle.degenerate.persistence.entities.PersistedRssFeed;
 import kboyle.degenerate.wrapper.PatternWrapper;
-import kboyle.oktane.core.module.annotations.*;
-import kboyle.oktane.core.processor.OktaneModule;
+import kboyle.oktane.core.module.annotations.Aliases;
+import kboyle.oktane.core.module.annotations.Description;
+import kboyle.oktane.core.module.annotations.Name;
+import kboyle.oktane.core.module.annotations.Remainder;
 import kboyle.oktane.core.results.command.CommandResult;
+import kboyle.oktane.discord4j.precondition.PermissionTarget;
+import kboyle.oktane.discord4j.precondition.RequireBotOwner;
+import kboyle.oktane.discord4j.precondition.RequirePermission;
 import reactor.core.publisher.Mono;
 
 import java.util.HashSet;
@@ -25,7 +29,6 @@ import java.util.stream.Collectors;
 @Aliases({"feed", "f"})
 @Name("Feed")
 @Description("Commands to manage your feed subscriptions and feed filters")
-@OktaneModule
 public class FeedModule extends DegenerateModule {
     private final PersistedGuildRepository guildRepo;
     private final PersistedRssFeedRepository feedRepo;
@@ -38,7 +41,7 @@ public class FeedModule extends DegenerateModule {
     }
 
     @Aliases({"add", "a"})
-    @Require(precondition = RequireBotOwner.class)
+    @RequireBotOwner
     public Mono<CommandResult> addFeed(String name, String url) {
         return Mono.justOrEmpty(feedRepo.findById(url))
             .map(feed -> embed("Feed was already added"))
@@ -52,7 +55,7 @@ public class FeedModule extends DegenerateModule {
     }
 
     @Aliases({"remove", "rm", "r"})
-    @Require(precondition = RequireBotOwner.class)
+    @RequireBotOwner
     public CommandResult removeFeed(@Remainder PersistedRssFeed feed) {
         for (var persistedGuild : guildRepo.findAll()) {
             persistedGuild.getSubscriptionByFeedUrl().remove(feed);
@@ -64,19 +67,15 @@ public class FeedModule extends DegenerateModule {
     }
 
     @Aliases({"subscribe", "sub"})
-    @RequireAny({
-        @Require(precondition = RequireUserPermission.class, arguments = "ADMINISTRATOR"),
-        @Require(precondition = RequireBotOwner.class)
-    })
+    @RequireBotOwner(group = "owner or admin")
+    @RequirePermission(target = PermissionTarget.USER, permissions = Permission.ADMINISTRATOR, group = "owner or admin")
     public Mono<CommandResult> subscribe(@Remainder PersistedRssFeed feed) {
-        return subscribe(context().channel, feed);
+        return context().channel().ofType(TextChannel.class).flatMap(channel -> subscribe(channel, feed));
     }
 
     @Aliases({"subscribe", "sub"})
-    @RequireAny({
-        @Require(precondition = RequireUserPermission.class, arguments = "ADMINISTRATOR"),
-        @Require(precondition = RequireBotOwner.class)
-    })
+    @RequireBotOwner(group = "owner or admin")
+    @RequirePermission(target = PermissionTarget.USER, permissions = Permission.ADMINISTRATOR, group = "owner or admin")
     public Mono<CommandResult> subscribe(TextChannel channel, @Remainder PersistedRssFeed feed) {
         return context().guild()
             .flatMap(guild -> {
@@ -112,10 +111,8 @@ public class FeedModule extends DegenerateModule {
     }
 
     @Aliases({"unsubscribe", "unsub"})
-    @RequireAny({
-        @Require(precondition = RequireUserPermission.class, arguments = "ADMINISTRATOR"),
-        @Require(precondition = RequireBotOwner.class)
-    })
+    @RequireBotOwner(group = "owner or admin")
+    @RequirePermission(target = PermissionTarget.USER, permissions = Permission.ADMINISTRATOR, group = "owner or admin")
     public Mono<CommandResult> unsubscribe(@Remainder PersistedFeedSubscription subscription) {
         return context().guild()
             .map(guild -> {
@@ -159,7 +156,6 @@ public class FeedModule extends DegenerateModule {
 
     @Aliases({"filter", "f"})
     @Name("Filter")
-    @OktaneModule
     public static class FeedFilterModule extends DegenerateModule {
         @Aliases({"list", "l"})
         public CommandResult listFilters(@Remainder PersistedFeedSubscription subscription) {
@@ -180,11 +176,8 @@ public class FeedModule extends DegenerateModule {
 
         @Aliases({"add", "a"})
         @Name("Add Filter")
-        @RequireAny({
-            @Require(precondition = RequireUserPermission.class, arguments = "ADMINISTRATOR"),
-            @Require(precondition = RequireBotOwner.class)
-        })
-        @OktaneModule
+        @RequireBotOwner(group = "owner or admin")
+        @RequirePermission(target = PermissionTarget.USER, permissions = Permission.ADMINISTRATOR, group = "owner or admin")
         public static class FeedAddFilterModule extends DegenerateModule {
             private final PersistedSubscriptionRepository repo;
 
@@ -217,11 +210,8 @@ public class FeedModule extends DegenerateModule {
 
         @Aliases({"remove", "rm", "r"})
         @Name("Remove Filter")
-        @RequireAny({
-            @Require(precondition = RequireUserPermission.class, arguments = "ADMINISTRATOR"),
-            @Require(precondition = RequireBotOwner.class)
-        })
-        @OktaneModule
+        @RequireBotOwner(group = "owner or admin")
+        @RequirePermission(target = PermissionTarget.USER, permissions = Permission.ADMINISTRATOR, group = "owner or admin")
         public static class FeedRemoveFilterModule extends DegenerateModule {
             private final PersistedSubscriptionRepository repo;
 

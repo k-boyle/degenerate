@@ -6,31 +6,27 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.rest.util.AllowedMentions;
-import kboyle.degenerate.commands.ApplicationContextWrapper;
-import kboyle.degenerate.commands.DegenerateContext;
-import kboyle.degenerate.commands.results.DiscordResult;
-import kboyle.degenerate.services.PrefixService;
-import kboyle.oktane.core.CommandHandler;
+import kboyle.oktane.core.BeanProvider;
 import kboyle.oktane.core.results.ExceptionResult;
 import kboyle.oktane.core.results.search.CommandNotFoundResult;
+import kboyle.oktane.discord4j.DiscordCommandContext;
+import kboyle.oktane.discord4j.DiscordCommandHandler;
+import kboyle.oktane.discord4j.results.DiscordResult;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 @Component
 public class MessageCreateListener extends DiscordListener<MessageCreateEvent> {
-    private final CommandHandler<DegenerateContext> commandHandler;
-    private final ApplicationContextWrapper applicationContextWrapper;
-    private final PrefixService prefixService;
+    private final DiscordCommandHandler<DiscordCommandContext> commandHandler;
+    private final BeanProvider beanProvider;
 
     public MessageCreateListener(
-        GatewayDiscordClient gatewayDiscordClient,
-        CommandHandler<DegenerateContext> commandHandler,
-        ApplicationContextWrapper applicationContextWrapper,
-        PrefixService prefixService) {
+            GatewayDiscordClient gatewayDiscordClient,
+            DiscordCommandHandler<DiscordCommandContext> commandHandler,
+            BeanProvider beanProvider) {
         super(MessageCreateEvent.class, gatewayDiscordClient);
         this.commandHandler = commandHandler;
-        this.applicationContextWrapper = applicationContextWrapper;
-        this.prefixService = prefixService;
+        this.beanProvider = beanProvider;
     }
 
     @Override
@@ -40,10 +36,7 @@ public class MessageCreateListener extends DiscordListener<MessageCreateEvent> {
             .flatMap(message ->
                 message.getChannel()
                     .ofType(TextChannel.class)
-                    .flatMap(channel ->
-                        prefixService.hasPrefix(message)
-                            .flatMap(command -> executeCommand(message, channel, command))
-                    )
+                    .flatMap(channel -> executeCommand(message, channel))
             )
             .then();
     }
@@ -52,16 +45,12 @@ public class MessageCreateListener extends DiscordListener<MessageCreateEvent> {
         return !message.getAuthor().map(User::isBot).orElse(false);
     }
 
-    private Mono<Void> executeCommand(Message message, TextChannel channel, String command) {
-        logger.info("Executing {}", command);
+    private Mono<Void> executeCommand(Message message, TextChannel channel) {
+        logger.info("Executing {}", message.getContent());
 
-        var context = new DegenerateContext(
-            applicationContextWrapper,
-            message,
-            channel
-        );
+        var context = new DiscordCommandContext(message, beanProvider);
 
-        return commandHandler.execute(command, context)
+        return commandHandler.execute(message.getContent(), context)
             .flatMap(result -> {
                 logger.info("Got result {}", result);
 
@@ -79,8 +68,8 @@ public class MessageCreateListener extends DiscordListener<MessageCreateEvent> {
             })
             .doOnError(ex -> logger.error("An exception occurred when trying to execute the command", ex))
             .onErrorResume(ex ->
-                context.channel.createMessage(spec ->
-                    spec.setMessageReference(context.message.getId())
+                channel.createMessage(spec ->
+                    spec.setMessageReference(context.message().getId())
                         .setAllowedMentions(AllowedMentions.suppressAll())
                         .setContent("An exception was thrown when trying to execute the command, ping the dev")
                 )

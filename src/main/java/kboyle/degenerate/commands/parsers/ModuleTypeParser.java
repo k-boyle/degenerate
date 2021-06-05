@@ -1,19 +1,20 @@
 package kboyle.degenerate.commands.parsers;
 
-import kboyle.degenerate.commands.DegenerateContext;
-import kboyle.oktane.core.CommandHandler;
 import kboyle.oktane.core.module.Command;
 import kboyle.oktane.core.module.CommandModule;
 import kboyle.oktane.core.results.typeparser.TypeParserResult;
+import kboyle.oktane.discord4j.DiscordCommandContext;
+import kboyle.oktane.discord4j.DiscordCommandHandler;
+import kboyle.oktane.discord4j.parsers.DiscordTypeParser;
 import reactor.core.publisher.Mono;
 
 import static kboyle.degenerate.Utils.insensitiveContains;
 
-public class ModuleTypeParser extends DegenerateTypeParser<CommandModule> {
+public class ModuleTypeParser extends DiscordTypeParser<CommandModule> {
     @SuppressWarnings("unchecked")
     @Override
-    public Mono<TypeParserResult<CommandModule>> parse(DegenerateContext context, Command command, String input) {
-        var handler = (CommandHandler<DegenerateContext>) context.beanProvider().getBean(CommandHandler.class);
+    public Mono<TypeParserResult<CommandModule>> parse(DiscordCommandContext context, Command command, String input) {
+        var handler = (DiscordCommandHandler<DiscordCommandContext>) context.beanProvider().getBean(DiscordCommandHandler.class);
         return handler.flattenModules()
             .filter(module -> matchingModule(input, module))
             .findFirst()

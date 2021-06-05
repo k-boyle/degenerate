@@ -2,14 +2,15 @@ package kboyle.degenerate.commands.parsers;
 
 import com.github.redouane59.twitter.TwitterClient;
 import com.github.redouane59.twitter.dto.user.UserV2;
-import kboyle.degenerate.commands.DegenerateContext;
 import kboyle.oktane.core.module.Command;
 import kboyle.oktane.core.results.typeparser.TypeParserResult;
+import kboyle.oktane.discord4j.DiscordCommandContext;
+import kboyle.oktane.discord4j.parsers.DiscordTypeParser;
 import reactor.core.publisher.Mono;
 
-public class TwitterUserTypeParser extends DegenerateTypeParser<UserV2> {
+public class TwitterUserTypeParser extends DiscordTypeParser<UserV2> {
     @Override
-    public Mono<TypeParserResult<UserV2>> parse(DegenerateContext commandContext, Command command, String input) {
+    public Mono<TypeParserResult<UserV2>> parse(DiscordCommandContext commandContext, Command command, String input) {
         var user = commandContext.beanProvider().getBean(TwitterClient.class)
             .getUserFromUserName(input);
         return (user.getData() == null

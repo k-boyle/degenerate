@@ -1,5 +1,7 @@
 package kboyle.degenerate.persistence.entities;
 
+import kboyle.degenerate.persistence.converters.PrefixConverter;
+import kboyle.oktane.core.prefix.Prefix;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,11 +20,12 @@ public class PersistedGuild {
     private long id;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    private Set<String> prefixes;
+    @Convert(converter = PrefixConverter.class)
+    private Set<Prefix> prefixes;
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private Map<PersistedRssFeed, PersistedFeedSubscription> subscriptionByFeedUrl;
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<PersistedTwitterSubscription> twitterSubscriptions;
 }

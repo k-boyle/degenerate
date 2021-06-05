@@ -66,6 +66,7 @@ public class RssService {
                 var feed = entry.getKey();
                 var guildWithSubscriptions = entry.getValue();
 
+                logger.info("Fetching feed {}", feed.getUrl());
                 return Mono.fromFuture(rssReader.readAsync(feed.getUrl()))
                     .flatMapMany(Flux::fromStream)
                     .collectList()
@@ -77,9 +78,9 @@ public class RssService {
                     });
             })
             .doOnNext(message -> logger.info("Sending rss notification to {}", message.getChannelId()))
-            .repeat()
             .doOnError(ex -> logger.error("An error was thrown whilst trying to poll feeds", ex))
             .onErrorResume(ex -> Mono.empty())
+            .repeat()
             .then();
     }
 
@@ -95,13 +96,13 @@ public class RssService {
         var subscription = guildWithSubscription.subscription;
 
         var fetchedGuids = fetchedItemByGuid.keySet();
-        logger.debug("Got {} items", fetchedGuids.size());
+        logger.info("Got {} items", fetchedGuids.size());
 
-        logger.debug("Checking diffs for {}", subscription.getChannelId());
+        logger.info("Checking diffs for {}", subscription.getChannelId());
         var lastGuids = subscription.getLastGuids();
         var newItems = getNewItems(fetchedItemByGuid, subscription, fetchedGuids, lastGuids);
 
-        logger.debug("Found {} matching items in {}", newItems.size(), subscription.getChannelId());
+        logger.info("Found {} matching items in {}", newItems.size(), subscription.getChannelId());
 
         if (newItems.isEmpty()) {
             return Flux.empty();
@@ -124,13 +125,13 @@ public class RssService {
             Set<String> lastGuids) {
         var diff = Sets.difference(fetchedGuids, lastGuids);
         // todo swap diff and delete
-        logger.debug("Found {} diffs for {}", diff.size(), subscription.getChannelId());
+        logger.info("Found {} diffs for {}", diff.size(), subscription.getChannelId());
 
         if (diff.isEmpty()) {
             return List.of();
         }
 
-        logger.debug("Checking for matching items in {}", subscription.getChannelId());
+        logger.info("Checking for matching items in {}", subscription.getChannelId());
 
         return diff.stream()
             .map(itemByGuid::get)
@@ -141,7 +142,7 @@ public class RssService {
     private void saveNewItems(PersistedGuild persistedGuild, Set<String> lastGuids, List<Item> newItems) {
         newItems.forEach(item -> item.getGuid().ifPresent(lastGuids::add));
         guildRepo.save(persistedGuild);
-        logger.debug("Updated {} with {} new items", persistedGuild.getId(), newItems.size());
+        logger.info("Updated {} with {} new items", persistedGuild.getId(), newItems.size());
     }
 
     private boolean itemMatches(Item item, PersistedFeedSubscription subscription) {

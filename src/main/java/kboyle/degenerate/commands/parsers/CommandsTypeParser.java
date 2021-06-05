@@ -1,11 +1,11 @@
 package kboyle.degenerate.commands.parsers;
 
-import kboyle.degenerate.commands.DegenerateContext;
 import kboyle.oktane.core.CommandContext;
-import kboyle.oktane.core.CommandHandler;
 import kboyle.oktane.core.module.Command;
 import kboyle.oktane.core.parsers.TypeParser;
 import kboyle.oktane.core.results.typeparser.TypeParserResult;
+import kboyle.oktane.discord4j.DiscordCommandContext;
+import kboyle.oktane.discord4j.DiscordCommandHandler;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -17,7 +17,7 @@ public class CommandsTypeParser implements TypeParser<List<Command>> {
     @SuppressWarnings("unchecked")
     @Override
     public Mono<TypeParserResult<List<Command>>> parse(CommandContext context, Command c, String input) {
-        var handler = (CommandHandler<DegenerateContext>) context.beanProvider().getBean(CommandHandler.class);
+        var handler = (DiscordCommandHandler<DiscordCommandContext>) context.beanProvider().getBean(DiscordCommandHandler.class);
         var commands = handler.commands()
             .filter(command -> matchingCommand(input, command))
             .collect(Collectors.toList());

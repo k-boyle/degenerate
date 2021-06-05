@@ -53,14 +53,15 @@ public class TwitterService {
 
     private Mono<Void> twitterLoop() {
         return Flux.fromStream(() -> getSubscriptionsById().asMap().entrySet().stream())
-            .delaySequence(degenerateConfig.getTwitter().getPollingRate())
             .publishOn(Schedulers.boundedElastic())
+            .delaySequence(degenerateConfig.getTwitter().getPollingRate())
             .flatMap(entry -> {
                 var id = entry.getKey();
                 var subscriptions = entry.getValue();
 
                 var timeline = twitterClient.getUserTimeline(id, TWEET_HISTORY)
                     .stream()
+                    .filter(tweet -> tweet.getInReplyToUserId() == null)
                     .collect(Collectors.toMap(Tweet::getId, Function.identity()));
                 var newTweetIds = timeline.keySet();
 
@@ -90,9 +91,9 @@ public class TwitterService {
                     });
             })
             .doOnNext(message -> logger.info("Sending twitter notification to {}", message.getChannelId()))
-            .repeat()
             .doOnError(ex -> logger.error("An error was thrown whilst trying to poll feeds", ex))
             .onErrorResume(ex -> Mono.empty())
+            .repeat()
             .then();
     }
 

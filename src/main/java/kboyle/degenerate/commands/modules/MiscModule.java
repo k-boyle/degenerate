@@ -1,16 +1,19 @@
 package kboyle.degenerate.commands.modules;
 
-import kboyle.degenerate.commands.DegenerateContext;
+import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.rest.util.Permission;
 import kboyle.degenerate.commands.DegenerateModule;
-import kboyle.degenerate.commands.preconditions.RequireBotOwner;
-import kboyle.degenerate.commands.preconditions.RequireBotPermission;
-import kboyle.degenerate.commands.preconditions.RequireUserPermission;
-import kboyle.oktane.core.CommandHandler;
 import kboyle.oktane.core.module.Command;
 import kboyle.oktane.core.module.CommandModule;
-import kboyle.oktane.core.module.annotations.*;
-import kboyle.oktane.core.processor.OktaneModule;
+import kboyle.oktane.core.module.annotations.Aliases;
+import kboyle.oktane.core.module.annotations.Name;
+import kboyle.oktane.core.module.annotations.Remainder;
 import kboyle.oktane.core.results.command.CommandResult;
+import kboyle.oktane.discord4j.DiscordCommandContext;
+import kboyle.oktane.discord4j.DiscordCommandHandler;
+import kboyle.oktane.discord4j.precondition.PermissionTarget;
+import kboyle.oktane.discord4j.precondition.RequireBotOwner;
+import kboyle.oktane.discord4j.precondition.RequirePermission;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -21,11 +24,10 @@ import static kboyle.degenerate.Constants.DEGENERATE_COLOUR;
 import static kboyle.degenerate.Markdown.CODE;
 
 @Name("Misc")
-@OktaneModule
 public class MiscModule extends DegenerateModule {
-    private final CommandHandler<DegenerateContext> commandHandler;
+    private final DiscordCommandHandler<DiscordCommandContext> commandHandler;
 
-    public MiscModule(CommandHandler<DegenerateContext> commandHandler) {
+    public MiscModule(DiscordCommandHandler<DiscordCommandContext> commandHandler) {
         this.commandHandler = commandHandler;
     }
 
@@ -35,16 +37,16 @@ public class MiscModule extends DegenerateModule {
     }
 
     @Aliases("owner")
-    @Require(precondition = RequireBotOwner.class)
+    @RequireBotOwner
     public CommandResult owner() {
         return reply("ur cute");
     }
 
     @Aliases("help")
     public Mono<CommandResult> help() {
-        return context().client.getSelf()
+        return context().client().getSelf()
             .map(degenerate ->
-                createMessage(messageSpec ->
+                reply(messageSpec ->
                     messageSpec.setEmbed(embedSpec -> {
                         var moduleNames = commandHandler.modules().stream()
                             .map(module -> module.name)
@@ -63,9 +65,9 @@ public class MiscModule extends DegenerateModule {
 
     @Aliases("module")
     public Mono<CommandResult> help(@Remainder CommandModule module) {
-        return context().client.getSelf()
+        return context().client().getSelf()
             .map(degenerate ->
-                createMessage(messageSpec ->
+                reply(messageSpec ->
                     messageSpec.setEmbed(embedSpec -> {
                         var description = module.description.orElse("Ping the dev to add a description >:[");
 
@@ -134,13 +136,13 @@ public class MiscModule extends DegenerateModule {
     }
 
     @Aliases("purge")
-    @RequireAny({
-        @Require(precondition = RequireUserPermission.class, arguments = "MANAGE_MESSAGES"),
-        @Require(precondition = RequireBotOwner.class)
-    })
-    @Require(precondition = RequireBotPermission.class, arguments = "MANAGE_MESSAGES")
+    @RequireBotOwner(group = "owner or manage messages")
+    @RequirePermission(target = PermissionTarget.USER, permissions = Permission.MANAGE_MESSAGES, group = "owner or manage messages")
+    @RequirePermission(target = PermissionTarget.BOT, permissions = Permission.MANAGE_MESSAGES)
     public Mono<CommandResult> purge(int count) {
-        return context().channel.bulkDeleteMessages(context().channel.getMessagesBefore(context().message.getId()).take(count))
+        return context().channel()
+            .ofType(TextChannel.class)
+            .flatMapMany(channel -> channel.bulkDeleteMessages(channel.getMessagesBefore(context().message().getId()).take(count)))
             .then(embed("Deleted %d messages", count).mono());
     }
 }
