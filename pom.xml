@@ -31,7 +31,7 @@
         <lombok.version>1.18.20</lombok.version>
 
         <rssreader.version>2.5.0</rssreader.version>
-        <twittered.version>1.22</twittered.version>
+        <twittered.version>1.26</twittered.version>
     </properties>
 
     <dependencyManagement>
