@@ -9,6 +9,7 @@ import discord4j.rest.util.AllowedMentions;
 import kboyle.oktane.core.BeanProvider;
 import kboyle.oktane.core.results.ExceptionResult;
 import kboyle.oktane.core.results.search.CommandNotFoundResult;
+import kboyle.oktane.core.results.search.MissingPrefixResult;
 import kboyle.oktane.discord4j.DiscordCommandContext;
 import kboyle.oktane.discord4j.DiscordCommandHandler;
 import kboyle.oktane.discord4j.results.DiscordResult;
@@ -56,7 +57,7 @@ public class MessageCreateListener extends DiscordListener<MessageCreateEvent> {
 
                 if (result instanceof DiscordResult discordResult) {
                     return discordResult.execute();
-                } else if (!(result instanceof CommandNotFoundResult) && !result.success()) {
+                } else if (!(result instanceof CommandNotFoundResult) && !(result instanceof MissingPrefixResult) && !result.success()) {
                     if (result instanceof ExceptionResult exceptionResult) {
                         logger.error("An exception was thrown", exceptionResult.exception());
                     }
