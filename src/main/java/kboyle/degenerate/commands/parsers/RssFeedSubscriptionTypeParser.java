@@ -3,12 +3,14 @@ package kboyle.degenerate.commands.parsers;
 import kboyle.degenerate.persistence.dao.PersistedGuildRepository;
 import kboyle.degenerate.persistence.entities.PersistedFeedSubscription;
 import kboyle.oktane.core.module.Command;
+import kboyle.oktane.core.processor.ConfigureWith;
 import kboyle.oktane.core.results.FailedResult;
 import kboyle.oktane.core.results.typeparser.TypeParserResult;
 import kboyle.oktane.discord4j.DiscordCommandContext;
 import kboyle.oktane.discord4j.parsers.DiscordTypeParser;
 import reactor.core.publisher.Mono;
 
+@ConfigureWith
 public class RssFeedSubscriptionTypeParser extends DiscordTypeParser<PersistedFeedSubscription> {
     private final RssFeedTypeParser feedTypeParser;
 

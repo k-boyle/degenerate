@@ -2,6 +2,7 @@ package kboyle.degenerate.commands.parsers;
 
 import kboyle.oktane.core.module.Command;
 import kboyle.oktane.core.module.CommandModule;
+import kboyle.oktane.core.processor.ConfigureWith;
 import kboyle.oktane.core.results.typeparser.TypeParserResult;
 import kboyle.oktane.discord4j.DiscordCommandContext;
 import kboyle.oktane.discord4j.DiscordCommandHandler;
@@ -10,6 +11,7 @@ import reactor.core.publisher.Mono;
 
 import static kboyle.degenerate.Utils.insensitiveContains;
 
+@ConfigureWith
 public class ModuleTypeParser extends DiscordTypeParser<CommandModule> {
     @SuppressWarnings("unchecked")
     @Override

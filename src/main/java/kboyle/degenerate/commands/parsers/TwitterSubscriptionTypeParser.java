@@ -4,11 +4,13 @@ import com.github.redouane59.twitter.TwitterClient;
 import kboyle.degenerate.persistence.dao.PersistedGuildRepository;
 import kboyle.degenerate.persistence.entities.PersistedTwitterSubscription;
 import kboyle.oktane.core.module.Command;
+import kboyle.oktane.core.processor.ConfigureWith;
 import kboyle.oktane.core.results.typeparser.TypeParserResult;
 import kboyle.oktane.discord4j.DiscordCommandContext;
 import kboyle.oktane.discord4j.parsers.DiscordTypeParser;
 import reactor.core.publisher.Mono;
 
+@ConfigureWith
 public class TwitterSubscriptionTypeParser extends DiscordTypeParser<PersistedTwitterSubscription> {
     @Override
     public Mono<TypeParserResult<PersistedTwitterSubscription>> parse(DiscordCommandContext context, Command command, String input) {
