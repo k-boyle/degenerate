@@ -18,7 +18,7 @@
 
         <discord4j.version>3.1.5</discord4j.version>
 
-        <spring.version>2.4.5</spring.version>
+        <spring.version>2.5.0</spring.version>
 
         <logback.version>1.2.3</logback.version>
         <slf4j.version>1.7.30</slf4j.version>
