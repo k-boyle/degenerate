@@ -14,7 +14,7 @@
         <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
         <maven-dependency-plugin.version>3.1.2</maven-dependency-plugin.version>
 
-        <oktane.version>4.4.2-SNAPSHOT</oktane.version>
+        <oktane.version>4.4.0.3-SNAPSHOT</oktane.version>
 
         <discord4j.version>3.1.5</discord4j.version>
 

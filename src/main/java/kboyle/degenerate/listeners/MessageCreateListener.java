@@ -1,5 +1,6 @@
 package kboyle.degenerate.listeners;
 
+import com.google.common.base.Strings;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
@@ -33,6 +34,7 @@ public class MessageCreateListener extends DiscordListener<MessageCreateEvent> {
     @Override
     public Mono<Void> handle(MessageCreateEvent event) {
         return Mono.just(event.getMessage())
+            .filter(message -> !Strings.isNullOrEmpty(message.getContent()))
             .filter(this::notBot)
             .flatMap(message ->
                 message.getChannel()
