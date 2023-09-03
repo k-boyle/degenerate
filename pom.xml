@@ -16,7 +16,7 @@
 
         <oktane.version>4.4.0.3-SNAPSHOT</oktane.version>
 
-        <discord4j.version>3.1.5</discord4j.version>
+        <discord4j.version>3.2.6</discord4j.version>
 
         <spring.version>2.5.0</spring.version>
 
