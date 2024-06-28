@@ -28,7 +28,7 @@
         <postgresql.version>42.2.20</postgresql.version>
         <r2dbc.version>0.8.7.RELEASE</r2dbc.version>
 
-        <lombok.version>1.18.20</lombok.version>
+        <lombok.version>1.18.34</lombok.version>
 
         <rssreader.version>2.5.0</rssreader.version>
         <twittered.version>1.26</twittered.version>
